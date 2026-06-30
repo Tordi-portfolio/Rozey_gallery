@@ -2,126 +2,183 @@
 
 {% block content %}
 
+<!-- ======= Hero ======= -->
 <section class="hero">
+    <div class="overlay">
 
-<div class="overlay">
+        <h1>Rozey Gallery</h1>
 
-<h1>
+        <p>
+            Professional Freehand Artist<br>
+            Creating realistic pencil drawings that capture beauty, imagination, and emotion.
+        </p>
 
-Rozey Gallery
+        <a href="{% url 'gallery' %}" class="btn">View Gallery</a>
 
-</h1>
-
-<p>
-
-Professional Freehand Artist
-
-Creating realistic pencil drawings that capture beauty, imagination, and emotion.
-
-</p>
-
-<a href="{% url 'gallery' %}" class="btn">
-
-View Gallery
-
-</a>
-
-</div>
-
+    </div>
 </section>
 
+<!-- ======= Featured Artworks ======= -->
 <section class="section">
 
-<h2>
+    <h2>Featured Artworks</h2>
 
-Featured Artworks
+    <div class="cards">
 
-</h2>
+        {% for artwork in featured %}
+        <div class="card">
+            <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}">
+            <div class="content">
+                <h3>{{ artwork.title }}</h3>
+                <p>{{ artwork.short_description }}</p>
+                <a href="{% url 'blog_detail' artwork.slug %}">Read More</a>
+            </div>
+        </div>
+        {% endfor %}
 
-<div class="cards">
-
-{% for artwork in featured %}
-
-<div class="card">
-
-<img src="{{ artwork.image.url }}">
-
-<div class="content">
-
-<h3>{{ artwork.title }}</h3>
-
-<p>{{ artwork.short_description }}</p>
-
-<a href="{% url 'blog_detail' artwork.slug %}">
-
-Read More
-
-</a>
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
+    </div>
 
 </section>
 
+<!-- ======= About Rozey (with artist photo) ======= -->
 <section class="about">
 
-<h2>
+    <div class="about-inner">
 
-About Rozey
+        <div class="artist-photo-wrap">
 
-</h2>
+            {% if artist_photo %}
+            {% else %}
+            <img src="../static/img/IMG-20260630-WA0176.jpg" alt="Rozey" class="artist-photo">
+                
+                
+                    
+                    
+                
+            {% endif %}
 
-<p>
+        </div>
 
-Rozey is a passionate artist specializing in realistic freehand drawings. Every artwork is carefully crafted with patience, creativity, and attention to detail. Through graphite and pencil, Rozey transforms imagination into timeless visual stories.
+        <div class="about-text">
 
-</p>
+            <h2>About Rozey</h2>
+
+            <p>
+                Rozey is a passionate artist specializing in realistic freehand drawings.
+                Every artwork is carefully crafted with patience, creativity, and attention
+                to detail. Through graphite and pencil, Rozey transforms imagination into
+                timeless visual stories.
+            </p>
+
+        </div>
+
+    </div>
 
 </section>
 
+<!-- ======= Artist Photos (3-slot strip with upload inputs) ======= -->
+<section class="photos-section">
+
+    <h2>My Photos</h2>
+
+    <div class="photo-strip">
+
+        <!-- Slot 1 -->
+        <div class="photo-slot" id="slot-1">
+
+            {% if photo_1 %}
+            <div class="slot-overlay"><span>Change Photo</span></div>
+            {% else %}
+            <img src="../static/img/IMG-20260630-WA0180.jpg" alt="Artist photo 1" id="preview-1">
+                
+            {% endif %}
+
+            <!-- File input covers entire slot — clicking anywhere triggers it -->
+            <input type="file" accept="image/*" onchange="previewSlot(this, 'slot-1')">
+
+        </div>
+
+        <!-- Slot 2 -->
+        <div class="photo-slot" id="slot-2">
+
+            {% if photo_2 %}
+            <div class="slot-overlay"><span>Change Photo</span></div>
+            {% else %}
+            <img src="../static/img/IMG-20260630-WA0179.jpg" alt="Artist photo 2" id="preview-2">
+                
+            {% endif %}
+
+            <input type="file" accept="image/*" onchange="previewSlot(this, 'slot-2')">
+
+        </div>
+
+        <!-- Slot 3 -->
+        <div class="photo-slot" id="slot-3">
+
+            {% if photo_3 %}
+            <div class="slot-overlay"><span>Change Photo</span></div>
+            {% else %}
+            <img src="../static/img/IMG-20260630-WA0177.jpg" alt="Artist photo 3" id="preview-3">
+                
+            {% endif %}
+
+            <input type="file" accept="image/*" onchange="previewSlot(this, 'slot-3')">
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ======= Latest Artworks ======= -->
 <section class="section">
 
-<h2>
+    <h2>Latest Artworks</h2>
 
-Latest Artworks
+    <div class="cards">
 
-</h2>
+        {% for artwork in latest %}
+        <div class="card">
+            <img src="{{ artwork.image.url }}" alt="{{ artwork.title }}">
+            <div class="content">
+                <h3>{{ artwork.title }}</h3>
+                <p>{{ artwork.short_description }}</p>
+            </div>
+        </div>
+        {% endfor %}
 
-<div class="cards">
-
-{% for artwork in latest %}
-
-<div class="card">
-
-<img src="{{ artwork.image.url }}">
-
-<div class="content">
-
-<h3>
-
-{{ artwork.title }}
-
-</h3>
-
-<p>
-
-{{ artwork.short_description }}
-
-</p>
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
+    </div>
 
 </section>
+
+<!-- Live client-side preview script (no server upload, just visual) -->
+<script>
+function previewSlot(input, slotId){
+    if(!input.files || !input.files[0]) return;
+    const slot = document.getElementById(slotId);
+    const reader = new FileReader();
+    reader.onload = function(e){
+        // remove placeholder if present
+        const empty = slot.querySelector('.slot-empty');
+        if(empty) empty.remove();
+        // update or create preview image
+        let img = slot.querySelector('img');
+        if(!img){
+            img = document.createElement('img');
+            slot.insertBefore(img, slot.querySelector('input'));
+        }
+        img.src = e.target.result;
+        img.alt = 'Artist photo';
+        // ensure overlay exists
+        if(!slot.querySelector('.slot-overlay')){
+            const ov = document.createElement('div');
+            ov.className = 'slot-overlay';
+            ov.innerHTML = '<span>Change Photo</span>';
+            slot.insertBefore(ov, slot.querySelector('input'));
+        }
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+</script>
 
 {% endblock %}
