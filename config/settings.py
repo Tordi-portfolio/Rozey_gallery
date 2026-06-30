@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-la#0x9g2shif-)-t9@(473nxd)k4s!@i0s(i1v0488@ruqn4$o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['rozey-gallery.onrender.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
