@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+<h1>Dashboard</h1>
+
+<br>
+
+<h3>Total Artworks: {{ posts }}</h3>
+
+<br>
+
+<a href="{% url 'add_artwork' %}" class="btn">
+
+Add New Artwork
+
+</a>
+
+<a href="{% url 'artwork_list' %}" class="btn">
+
+Manage Artworks
+
+</a>
+
+</div>
+
+{% endblock %}

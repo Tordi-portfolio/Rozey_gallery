@@ -1,0 +1,760 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rozey Gallery</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+        :root{
+            --deep:#012f3a;
+            --mid:#0a5468;
+            --teal:#0c7f8f;
+            --light-teal:#28b4b8;
+            --foam:#cdf4ee;
+            --sun:#ffe9a8;
+            --ink:#03222b;
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        html{
+            scroll-behavior:smooth;
+        }
+
+        body{
+            font-family:'Poppins',sans-serif;
+            color:var(--foam);
+            background:radial-gradient(ellipse at top, var(--mid) 0%, var(--deep) 55%, var(--ink) 100%);
+            min-height:100vh;
+            position:relative;
+            overflow-x:hidden;
+        }
+
+        h1,h2,h3{
+            font-family:'Cormorant Garamond', serif;
+            font-weight:600;
+            letter-spacing:.5px;
+        }
+
+        a{
+            font-family:inherit;
+        }
+
+        /* ===== Underwater atmosphere (fixed full-page backdrop) ===== */
+        .ocean{
+            position:fixed;
+            inset:0;
+            z-index:-2;
+            overflow:hidden;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255,255,255,.07), transparent 40%),
+                radial-gradient(circle at 80% 10%, rgba(255,255,255,.05), transparent 35%),
+                linear-gradient(180deg, var(--mid) 0%, var(--deep) 45%, var(--ink) 100%);
+        }
+
+        /* god-rays / caustic light shafts */
+        .ocean .ray{
+            position:absolute;
+            top:-10%;
+            width:140px;
+            height:140%;
+            background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 70%);
+            transform:rotate(8deg);
+            filter:blur(6px);
+            animation:swayRay 9s ease-in-out infinite;
+            opacity:.5;
+        }
+        .ocean .ray:nth-child(1){ left:8%;  animation-delay:0s; }
+        .ocean .ray:nth-child(2){ left:35%; width:90px; animation-delay:2s; opacity:.35;}
+        .ocean .ray:nth-child(3){ left:62%; width:170px; animation-delay:1s; opacity:.4;}
+        .ocean .ray:nth-child(4){ left:85%; width:70px; animation-delay:3.5s; opacity:.3;}
+
+        @keyframes swayRay{
+            0%,100%{ transform:rotate(8deg) translateX(0); }
+            50%{ transform:rotate(2deg) translateX(20px); }
+        }
+
+        /* caustic shimmer overlay */
+        .ocean::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background-image:
+                radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+            background-size:60px 60px;
+            animation:shimmer 6s linear infinite;
+            mix-blend-mode:screen;
+            opacity:.5;
+        }
+        @keyframes shimmer{
+            0%{ background-position:0 0; }
+            100%{ background-position:60px 80px; }
+        }
+
+        /* ===== Bubbles ===== */
+        .bubbles{
+            position:fixed;
+            inset:0;
+            z-index:-1;
+            pointer-events:none;
+            overflow:hidden;
+        }
+        .bubble{
+            position:absolute;
+            bottom:-10%;
+            width:10px;
+            height:10px;
+            border-radius:50%;
+            background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,.05) 70%);
+            opacity:.55;
+            animation:rise linear infinite;
+        }
+        @keyframes rise{
+            0%{ transform:translateY(0) translateX(0); opacity:0; }
+            10%{ opacity:.6; }
+            100%{ transform:translateY(-115vh) translateX(20px); opacity:0; }
+        }
+        .bubble:nth-child(1){ left:4%;  width:6px;  height:6px;  animation-duration:11s; animation-delay:0s; }
+        .bubble:nth-child(2){ left:12%; width:14px; height:14px; animation-duration:16s; animation-delay:2s; }
+        .bubble:nth-child(3){ left:22%; width:8px;  height:8px;  animation-duration:9s;  animation-delay:4s; }
+        .bubble:nth-child(4){ left:33%; width:11px; height:11px; animation-duration:14s; animation-delay:1s; }
+        .bubble:nth-child(5){ left:45%; width:7px;  height:7px;  animation-duration:10s; animation-delay:5s; }
+        .bubble:nth-child(6){ left:58%; width:16px; height:16px; animation-duration:18s; animation-delay:3s; }
+        .bubble:nth-child(7){ left:67%; width:9px;  height:9px;  animation-duration:12s; animation-delay:6s; }
+        .bubble:nth-child(8){ left:78%; width:13px; height:13px; animation-duration:15s; animation-delay:0.5s; }
+        .bubble:nth-child(9){ left:88%; width:6px;  height:6px;  animation-duration:9s;  animation-delay:3.5s; }
+        .bubble:nth-child(10){ left:95%; width:10px; height:10px; animation-duration:13s; animation-delay:2.5s; }
+
+        /* ===== Fish ===== */
+        .fish-layer{
+            position:fixed;
+            inset:0;
+            z-index:-1;
+            pointer-events:none;
+            overflow:hidden;
+        }
+        .fish{
+            position:absolute;
+            opacity:.85;
+            animation-timing-function:linear;
+            animation-iteration-count:infinite;
+        }
+        .fish svg{
+            display:block;
+            filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
+        }
+        .fish .body-wiggle{
+            animation:wiggle 1.6s ease-in-out infinite;
+            transform-origin:80% 50%;
+        }
+        @keyframes wiggle{
+            0%,100%{ transform:rotate(0deg); }
+            50%{ transform:rotate(4deg); }
+        }
+
+        @keyframes swimRight{
+            from{ transform:translateX(-12vw) translateY(0) scaleX(1); }
+            to{ transform:translateX(112vw) translateY(-10px) scaleX(1); }
+        }
+        @keyframes swimLeft{
+            from{ transform:translateX(112vw) translateY(0) scaleX(-1); }
+            to{ transform:translateX(-12vw) translateY(10px) scaleX(-1); }
+        }
+
+        .fish.f1{ top:18%; width:70px;  animation:swimRight 26s linear infinite; animation-delay:0s; }
+        .fish.f2{ top:32%; width:46px;  animation:swimLeft 19s linear infinite; animation-delay:3s; }
+        .fish.f3{ top:55%; width:90px;  animation:swimRight 34s linear infinite; animation-delay:8s; }
+        .fish.f4{ top:68%; width:38px;  animation:swimLeft 15s linear infinite; animation-delay:1s; }
+        .fish.f5{ top:78%; width:56px;  animation:swimRight 22s linear infinite; animation-delay:12s; }
+        .fish.f6{ top:42%; width:30px;  animation:swimLeft 13s linear infinite; animation-delay:6s; }
+
+        /* seaweed silhouettes anchored bottom */
+        .seaweed{
+            position:fixed;
+            bottom:-2px;
+            z-index:-1;
+            pointer-events:none;
+            opacity:.5;
+        }
+        .seaweed svg{ display:block; }
+        .seaweed.s1{ left:2%;  width:90px; }
+        .seaweed.s2{ left:20%; width:60px; }
+        .seaweed.s3{ right:6%; width:100px; }
+        .seaweed.s4{ right:25%; width:55px; }
+        .blade{
+            transform-origin:bottom center;
+            animation:swayBlade 4s ease-in-out infinite;
+        }
+        .blade:nth-child(2){ animation-delay:.6s; }
+        .blade:nth-child(3){ animation-delay:1.2s; }
+        @keyframes swayBlade{
+            0%,100%{ transform:rotate(-6deg); }
+            50%{ transform:rotate(6deg); }
+        }
+
+        /* ===== Navbar ===== */
+        nav{
+            background:rgba(2, 40, 48, .55);
+            backdrop-filter:blur(10px);
+            -webkit-backdrop-filter:blur(10px);
+            border-bottom:1px solid rgba(205,244,238,.15);
+            padding:18px 8%;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:sticky;
+            top:0;
+            z-index:1000;
+        }
+
+        .logo{
+            color:var(--foam);
+            font-family:'Cormorant Garamond', serif;
+            font-size:30px;
+            font-weight:700;
+            text-decoration:none;
+            letter-spacing:.5px;
+        }
+
+        nav ul{
+            display:flex;
+            list-style:none;
+        }
+
+        nav ul li{
+            margin-left:30px;
+        }
+
+        nav ul li a{
+            color:var(--foam);
+            text-decoration:none;
+            transition:.3s;
+            font-weight:400;
+            position:relative;
+        }
+
+        nav ul li a:hover{
+            color:var(--sun);
+        }
+
+        /* ===== Hero ===== */
+        .hero{
+            position:relative;
+            padding:140px 10% 120px;
+            text-align:center;
+            overflow:hidden;
+        }
+
+        .hero .overlay{
+            position:relative;
+            z-index:1;
+        }
+
+        .hero h1{
+            font-size:60px;
+            margin-bottom:20px;
+            color:var(--foam);
+            text-shadow:0 4px 18px rgba(0,0,0,.35);
+        }
+
+        .hero p{
+            font-family:'Poppins',sans-serif;
+            font-size:19px;
+            max-width:760px;
+            margin:auto;
+            line-height:1.8;
+            color:rgba(205,244,238,.9);
+        }
+
+        /* ===== Buttons ===== */
+        .btn{
+            display:inline-block;
+            margin-top:35px;
+            padding:14px 30px;
+            background:linear-gradient(135deg, var(--light-teal), var(--teal));
+            color:#03222b;
+            text-decoration:none;
+            border-radius:30px;
+            font-weight:600;
+            letter-spacing:.3px;
+            box-shadow:0 8px 22px rgba(12,127,143,.45);
+            transition:transform .25s, box-shadow .25s;
+        }
+
+        .btn:hover{
+            transform:translateY(-3px);
+            box-shadow:0 12px 28px rgba(12,127,143,.6);
+        }
+
+        /* ===== Sections ===== */
+        .section, .about{
+            padding:70px 10%;
+            position:relative;
+        }
+
+        .section h2, .about h2{
+            color:var(--foam);
+            margin-bottom:10px;
+            font-size:36px;
+            text-align:center;
+        }
+
+        .section h2::after, .about h2::after{
+            content:"";
+            display:block;
+            width:60px;
+            height:3px;
+            margin:14px auto 0;
+            background:linear-gradient(90deg, transparent, var(--light-teal), transparent);
+            border-radius:3px;
+        }
+
+        .about{
+            background:rgba(3,34,43,.35);
+            border-top:1px solid rgba(205,244,238,.08);
+            border-bottom:1px solid rgba(205,244,238,.08);
+        }
+
+        .about p{
+            line-height:1.9;
+            font-size:18px;
+            max-width:780px;
+            margin:20px auto 0;
+            text-align:center;
+            color:rgba(205,244,238,.9);
+        }
+
+        /* ===== Cards (glass / porthole feel) ===== */
+        .cards{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+            gap:30px;
+            margin-top:45px;
+        }
+
+        .card{
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(205,244,238,.18);
+            border-radius:14px;
+            overflow:hidden;
+            backdrop-filter:blur(8px);
+            -webkit-backdrop-filter:blur(8px);
+            box-shadow:0 10px 30px rgba(0,0,0,.3);
+            transition:transform .35s, box-shadow .35s;
+        }
+
+        .card:hover{
+            transform:translateY(-8px);
+            box-shadow:0 18px 40px rgba(0,0,0,.4);
+        }
+
+        .card img{
+            width:100%;
+            height:280px;
+            object-fit:cover;
+            display:block;
+        }
+
+        .card .content{
+            padding:20px;
+        }
+
+        .card h3{
+            color:var(--foam);
+            margin-bottom:10px;
+            font-size:22px;
+        }
+
+        .card p{
+            color:rgba(205,244,238,.85);
+            font-size:15px;
+            line-height:1.6;
+        }
+
+        .card a{
+            display:inline-block;
+            margin-top:14px;
+            color:var(--sun);
+            text-decoration:none;
+            font-weight:600;
+            font-size:14px;
+        }
+
+        .card a:hover{
+            text-decoration:underline;
+        }
+
+        /* ===== Table ===== */
+        .container{
+            width:90%;
+            max-width:1100px;
+            margin:60px auto;
+            position:relative;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:rgba(255,255,255,.05);
+            backdrop-filter:blur(8px);
+            border-radius:10px;
+            overflow:hidden;
+        }
+
+        table th,
+        table td{
+            padding:15px;
+            border:1px solid rgba(205,244,238,.15);
+            color:var(--foam);
+        }
+
+        table th{
+            background:rgba(12,127,143,.55);
+            color:white;
+        }
+
+        /* ===== Login ===== */
+        .login-container{
+            min-height:80vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:40px 5%;
+        }
+
+        .login-card{
+            width:420px;
+            max-width:100%;
+            background:rgba(255,255,255,.07);
+            border:1px solid rgba(205,244,238,.2);
+            backdrop-filter:blur(12px);
+            -webkit-backdrop-filter:blur(12px);
+            padding:40px;
+            border-radius:14px;
+            box-shadow:0 18px 40px rgba(0,0,0,.4);
+        }
+
+        .login-card h1{
+            color:var(--foam);
+            margin-bottom:10px;
+            font-size:32px;
+        }
+
+        .login-card p{
+            margin-bottom:25px;
+            color:rgba(205,244,238,.85);
+        }
+
+        .login-card input,
+        .form-control{
+            width:100%;
+            padding:14px;
+            margin-bottom:18px;
+            border:1px solid rgba(205,244,238,.25);
+            border-radius:8px;
+            background:rgba(255,255,255,.08);
+            color:var(--foam);
+        }
+
+        .login-card input::placeholder{
+            color:rgba(205,244,238,.5);
+        }
+
+        .login-card button,
+        button.btn{
+            width:100%;
+            padding:14px;
+            background:linear-gradient(135deg, var(--light-teal), var(--teal));
+            color:#03222b;
+            border:none;
+            border-radius:8px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:transform .2s;
+        }
+
+        .login-card button:hover{
+            transform:translateY(-2px);
+        }
+
+        .alert{
+            background:rgba(179,0,0,.2);
+            color:#ffd3d3;
+            border:1px solid rgba(255,150,150,.4);
+            padding:12px;
+            margin-bottom:20px;
+            border-radius:6px;
+        }
+
+        /* ===== Footer ===== */
+        footer{
+            background:rgba(1, 24, 30, .85);
+            color:rgba(205,244,238,.85);
+            padding:36px 20px;
+            text-align:center;
+            margin-top:80px;
+            border-top:1px solid rgba(205,244,238,.12);
+            position:relative;
+        }
+
+        footer h3{
+            color:var(--foam);
+            font-size:24px;
+            margin-bottom:8px;
+        }
+
+        /* ===== Responsive ===== */
+        @media(max-width:768px){
+
+            nav{
+                flex-direction:column;
+                padding:16px 6%;
+            }
+
+            nav ul{
+                margin-top:16px;
+                flex-direction:row;
+                flex-wrap:wrap;
+                justify-content:center;
+            }
+
+            nav ul li{
+                margin:6px 12px;
+            }
+
+            .hero{
+                padding:90px 6% 70px;
+            }
+
+            .hero h1{
+                font-size:36px;
+            }
+
+            .hero p{
+                font-size:16px;
+            }
+
+            .section, .about{
+                padding:50px 6%;
+            }
+
+            .section h2, .about h2{
+                font-size:28px;
+            }
+
+            .login-card{
+                padding:28px;
+            }
+
+            .fish.f1{ width:46px; }
+            .fish.f3{ width:60px; }
+            .fish.f5{ width:40px; }
+        }
+
+        @media(max-width:480px){
+            .hero h1{
+                font-size:30px;
+            }
+            .card img{
+                height:220px;
+            }
+        }
+
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce){
+            .fish, .bubble, .ocean .ray, .ocean::after, .blade{
+                animation:none !important;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+<!-- Underwater backdrop -->
+<div class="ocean">
+    <div class="ray"></div>
+    <div class="ray"></div>
+    <div class="ray"></div>
+    <div class="ray"></div>
+</div>
+
+<div class="bubbles">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</div>
+
+<div class="fish-layer">
+
+    <div class="fish f1">
+        <svg viewBox="0 0 100 50" class="body-wiggle">
+            <path d="M10 25 C 25 5, 65 5, 85 25 C 65 45, 25 45, 10 25 Z" fill="#28b4b8" opacity="0.9"/>
+            <path d="M10 25 L -5 12 L -5 38 Z" fill="#28b4b8" opacity="0.9"/>
+            <circle cx="72" cy="20" r="2.4" fill="#03222b"/>
+        </svg>
+    </div>
+
+    <div class="fish f2">
+        <svg viewBox="0 0 100 50" class="body-wiggle">
+            <path d="M10 25 C 25 5, 65 5, 85 25 C 65 45, 25 45, 10 25 Z" fill="#ffe9a8" opacity="0.85"/>
+            <path d="M10 25 L -5 12 L -5 38 Z" fill="#ffe9a8" opacity="0.85"/>
+            <circle cx="72" cy="20" r="2.4" fill="#03222b"/>
+        </svg>
+    </div>
+
+    <div class="fish f3">
+        <svg viewBox="0 0 100 50" class="body-wiggle">
+            <path d="M10 25 C 25 5, 65 5, 85 25 C 65 45, 25 45, 10 25 Z" fill="#0c7f8f" opacity="0.9"/>
+            <path d="M10 25 L -5 12 L -5 38 Z" fill="#0c7f8f" opacity="0.9"/>
+            <circle cx="72" cy="20" r="2.6" fill="#03222b"/>
+        </svg>
+    </div>
+
+    <div class="fish f4">
+        <svg viewBox="0 0 100 50" class="body-wiggle">
+            <path d="M10 25 C 25 5, 65 5, 85 25 C 65 45, 25 45, 10 25 Z" fill="#cdf4ee" opacity="0.8"/>
+            <path d="M10 25 L -5 12 L -5 38 Z" fill="#cdf4ee" opacity="0.8"/>
+            <circle cx="72" cy="20" r="2.2" fill="#03222b"/>
+        </svg>
+    </div>
+
+    <div class="fish f5">
+        <svg viewBox="0 0 100 50" class="body-wiggle">
+            <path d="M10 25 C 25 5, 65 5, 85 25 C 65 45, 25 45, 10 25 Z" fill="#28b4b8" opacity="0.85"/>
+            <path d="M10 25 L -5 12 L -5 38 Z" fill="#28b4b8" opacity="0.85"/>
+            <circle cx="72" cy="20" r="2.4" fill="#03222b"/>
+        </svg>
+    </div>
+
+    <div class="fish f6">
+        <svg viewBox="0 0 100 50" class="body-wiggle">
+            <path d="M10 25 C 25 5, 65 5, 85 25 C 65 45, 25 45, 10 25 Z" fill="#ffe9a8" opacity="0.8"/>
+            <path d="M10 25 L -5 12 L -5 38 Z" fill="#ffe9a8" opacity="0.8"/>
+            <circle cx="72" cy="20" r="2" fill="#03222b"/>
+        </svg>
+    </div>
+
+</div>
+
+<div class="seaweed s1">
+    <svg viewBox="0 0 90 160">
+        <path class="blade" d="M15 160 C 5 120, 25 90, 10 60 C 0 35, 18 15, 12 0" stroke="#0a5468" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path class="blade" d="M45 160 C 55 115, 35 85, 50 55 C 60 30, 40 12, 48 0" stroke="#0c7f8f" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path class="blade" d="M72 160 C 80 125, 64 95, 76 65 C 84 42, 68 20, 74 0" stroke="#0a5468" stroke-width="7" fill="none" stroke-linecap="round"/>
+    </svg>
+</div>
+
+<div class="seaweed s2">
+    <svg viewBox="0 0 60 110">
+        <path class="blade" d="M10 110 C 2 80, 18 60, 8 35 C 0 20, 14 10, 9 0" stroke="#0c7f8f" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path class="blade" d="M35 110 C 44 78, 28 58, 40 32 C 46 16, 32 8, 38 0" stroke="#0a5468" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </svg>
+</div>
+
+<div class="seaweed s3">
+    <svg viewBox="0 0 90 170">
+        <path class="blade" d="M15 170 C 5 130, 25 95, 10 65 C 0 40, 18 18, 12 0" stroke="#0a5468" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path class="blade" d="M45 170 C 55 122, 35 90, 50 60 C 60 35, 40 14, 48 0" stroke="#0c7f8f" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path class="blade" d="M72 170 C 80 132, 64 100, 76 68 C 84 45, 68 22, 74 0" stroke="#0a5468" stroke-width="7" fill="none" stroke-linecap="round"/>
+    </svg>
+</div>
+
+<div class="seaweed s4">
+    <svg viewBox="0 0 60 100">
+        <path class="blade" d="M10 100 C 2 74, 18 54, 8 32 C 0 18, 14 9, 9 0" stroke="#0c7f8f" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path class="blade" d="M35 100 C 44 70, 28 52, 40 30 C 46 15, 32 7, 38 0" stroke="#0a5468" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </svg>
+</div>
+
+<nav>
+
+    <a href="/" class="logo">
+        Rozey Gallery
+    </a>
+
+    <ul>
+
+        <li>
+            <a href="{% url 'home' %}">
+                Home
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'gallery' %}">
+                Gallery
+            </a>
+        </li>
+
+        {% if user.is_authenticated %}
+
+            <li>
+                <a href="{% url 'dashboard' %}">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'logout' %}">
+                    Logout
+                </a>
+            </li>
+
+        {% else %}
+
+            <li>
+                <a href="{% url 'login' %}">
+                    Admin Login
+                </a>
+            </li>
+
+        {% endif %}
+
+    </ul>
+
+</nav>
+
+{% block content %}
+{% endblock %}
+
+<footer>
+
+    <h3>Rozey Gallery</h3>
+
+    <p>
+        Creating Realistic Freehand Drawings Through Passion and Creativity.
+    </p>
+
+    <br>
+
+    <p>
+        © 2026 Rozey Gallery. All Rights Reserved.
+    </p>
+
+</footer>
+
+</body>
+
+</html>
